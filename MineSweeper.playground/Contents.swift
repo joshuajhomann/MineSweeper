@@ -61,13 +61,10 @@ struct Board {
       return
     }
     visibility[index] = true
-    if case let .empty(count) = squares[index],
-      count == 0 {
-      reveal(x: x - 1, y: y)
-      reveal(x: x + 1, y: y)
-      reveal(x: x, y: y - 1)
-      reveal(x: x, y: y + 1)
+    guard case let .empty(count) = squares[index], count == 0 else {
+        return
     }
+    adjacentOffsets.map {i,j in (i+x, j+y)}.forEach {(x, y) in self.reveal(x: x, y: y)}
   }
   func descriptionFor(x: Int, y: Int) -> String {
     let index = x+y*dimension
@@ -131,6 +128,9 @@ class ViewController: UIViewController {
   }
 
   @objc private func tap(recognizer: UITapGestureRecognizer) {
+    guard board.gameState == .playing else {
+      return
+    }
     let point = recognizer.location(in: view)
     board.reveal(x: Int(point.x / labelDimension), y: Int(point.y / labelDimension))
     updateLabels()
